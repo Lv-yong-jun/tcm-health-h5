@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中医体质自测 · 加载中...</title>
+<style>
+body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;font-family:sans-serif;background:#f0f4f0}
+.loader{font-size:18px;color:#5a8a5a}
+</style>
+</head>
+<body>
+<div class="loader">⏳ 正在加载...</div>
+<script>
+// Fetch the actual HTML from Gitee RAW and render it
+fetch('https://gitee.com/cd-jinbehe_0/tcm-health-check/raw/master/index.html')
+  .then(r => r.text())
+  .then(html => {
+    document.open();
+    document.write(html);
+    document.close();
+  })
+  .catch(err => {
+    document.body.innerHTML = '<div style="text-align:center;padding:40px;font-family:sans-serif"><h2>加载失败</h2><p>请稍后重试，或联系吕勇军先生获取帮助</p><p style="color:#999;font-size:14px">错误：' + err.message + '</p></div>';
+  });
+</script>
+</body>
+</html>
