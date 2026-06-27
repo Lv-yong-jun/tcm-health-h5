@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中医体质自测 - 专业版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        .content { padding: 30px; }
+        .question-section { margin-bottom: 30px; }
+        .question { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #667eea; }
+        .question h3 { color: #333; margin-bottom: 15px; font-size: 18px; }
+        .options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .option { background: white; border: 2px solid #e0e0e0; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 120px; text-align: center; }
+        .option:hover { border-color: #667eea; background: #f0f4ff; }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 40px; border-radius: 25px; font-size: 18px; cursor: pointer; display: block; margin: 30px auto; transition: transform 0.3s; }
+        .btn:hover { transform: translateY(-2px); }
+        .result { display: none; padding: 30px; }
+        .result.show { display: block; }
+        .constitution-card { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 25px; border-radius: 15px; margin-bottom: 25px; color: #333; }
+        .constitution-card h2 { color: #d32f2f; margin-bottom: 15px; font-size: 24px; }
+        .severity-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
+        .severity-mild { background: #4caf50; color: white; }
+        .severity-moderate { background: #ff9800; color: white; }
+        .severity-severe { background: #f44336; color: white; }
+        .analysis-section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        .analysis-section h3 { color: #667eea; margin-bottom: 15px; font-size: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .tcm-analysis { background: #f0f8ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3; }
+        .simple-explanation { background: #fff9c4; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffc107; }
+        .detailed-analysis { background: #f3e5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #9c27b0; }
+        .treatment-plan { background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50; }
+        .lifestyle-advice { background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ff9800; }
+        .warnings { background: #ffebee; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f44336; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
+        .contact-info { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 10px; }
+        .qr-code { width: 150px; height: 150px; margin: 15px auto; background: #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 中医体质自测</h1>
+            <p>基于国家中医药管理局标准，结合老中医四诊合参思路</p>
+        </div>
+        
+        <div class="content">
+            <div id="question-container">
+                <!-- 问题将在这里动态生成 -->
+            </div>
+            <button class="btn" id="analyze-btn" style="display: none;">🔍 开始分析我的体质</button>
+        </div>
+        
+        <div class="result" id="result-container">
+            <!-- 结果将在这里显示 -->
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 吕勇军【平安金融科技集团】</p>
+            <div class="contact-info">
+                <p>📱 扫码咨询专业中医师</p>
+                <div class="qr-code">个人微信二维码</div>
+                <p>微信号：Lv-yong-jun</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 优化后的中医体质分析逻辑
+        const questions = [
+            // 气虚体质相关问题
+            { id: 'q1', text: '您容易疲乏吗？', category: 'qiDeficient', weight: 2 },
+            { id: 'q2', text: '您容易气短（呼吸短促）吗？', category: 'qiDeficient', weight: 2 },
+            { id: 'q3', text: '您容易头晕或站起时头晕吗？', category: 'qiDeficient', weight: 1 },
+            { id: 'q4', text: '您容易感冒吗？', category: 'qiDeficient', weight: 1 },
+            { id: 'q5', text: '您喜欢安静、懒得说话吗？', category: 'qiDeficient', weight: 1 },
+            
+            // 阳虚体质相关问题
+            { id: 'q6', text: '您手脚发凉吗？', category: 'yangDeficient', weight: 2 },
+            { id: 'q7', text: '您胃脘部、背部或腰膝怕冷吗？', category: 'yangDeficient', weight: 2 },
+            { id: 'q8', text: '您比别人更容易怕冷吗？', category: 'yangDeficient', weight: 1 },
+            { id: 'q9', text: '您吃（喝）凉的东西会不舒服吗？', category: 'yangDeficient', weight: 1 },
+            { id: 'q10', text: '您受凉或吃（喝）凉的东西容易腹泻吗？', category: 'yangDeficient', weight: 1 },
+            
+            // 阴虚体质相关问题
+            { id: 'q11', text: '您手心脚心发热吗？', category: 'yinDeficient', weight: 2 },
+            { id: 'q12', text: '您皮肤或口唇干吗？', category: 'yinDeficient', weight: 1 },
+            { id: 'q13', text: '您口唇的颜色比一般人红吗？', category: 'yinDeficient', weight: 1 },
+            { id: 'q14', text: '您容易便秘或大便干燥吗？', category: 'yinDeficient', weight: 1 },
+            { id: 'q15', text: '您面部两颧潮红或偏红吗？', category: 'yinDeficient', weight: 1 },
+            
+            // 痰湿体质相关问题
+            { id: 'q16', text: '您感到胸闷或腹部胀满吗？', category: 'phlegmDampness', weight: 2 },
+            { id: 'q17', text: '您感到身体沉重不轻松吗？', category: 'phlegmDampness', weight: 2 },
+            { id: 'q18', text: '您腹部肥满松软吗？', category: 'phlegmDampness', weight: 1 },
+            { id: 'q19', text: '您有额头的油脂分泌多吗？', category: 'phlegmDampness', weight: 1 },
+            { id: 'q20', text: '您上眼睑比别人肿（上眼睑有轻微隆起）吗？', category: 'phlegmDampness', weight: 1 },
+            
+            // 湿热体质相关问题
+            { id: 'q21', text: '您面部或鼻部有油腻感或油亮发光吗？', category: 'dampHeat', weight: 2 },
+            { id: 'q22', text: '您容易生痤疮或疮疖吗？', category: 'dampHeat', weight: 2 },
+            { id: 'q23', text: '您感到口苦或嘴里有异味吗？', category: 'dampHeat', weight: 1 },
+            { id: 'q24', text: '您大便有黏滞不爽（冲不干净）的感觉吗？', category: 'dampHeat', weight: 1 },
+            { id: 'q25', text: '您小便时尿道有发热感、尿色浓（深）吗？', category: 'dampHeat', weight: 1 },
+            
+            // 血瘀体质相关问题
+            { id: 'q26', text: '您的皮肤在不知不觉中会出现青紫瘀斑吗？', category: 'bloodStasis', weight: 2 },
+            { id: 'q27', text: '您两颧骨有细微红丝吗？', category: 'bloodStasis', weight: 1 },
+            { id: 'q28', text: '您身体上有哪里疼痛吗？', category: 'bloodStasis', weight: 1 },
+            { id: 'q29', text: '您面色晦暗或容易出现褐斑吗？', category: 'bloodStasis', weight: 1 },
+            { id: 'q30', text: '您容易有黑眼圈吗？', category: 'bloodStasis', weight: 1 },
+            
+            // 气郁体质相关问题
+            { id: 'q31', text: '您感到闷闷不乐、情绪低沉吗？', category: 'qiStagnation', weight: 2 },
+            { id: 'q32', text: '您精神紧张、焦虑不安吗？', category: 'qiStagnation', weight: 2 },
+            { id: 'q33', text: '您多愁善感、感情脆弱吗？', category: 'qiStagnation', weight: 1 },
+            { id: 'q34', text: '您容易感到害怕或受到惊吓吗？', category: 'qiStagnation', weight: 1 },
+            { id: 'q35', text: '您胁肋部或乳房胀痛吗？', category: 'qiStagnation', weight: 1 },
+            
+            // 特禀体质相关问题
+            { id: 'q36', text: '您没有感冒时也会打喷嚏吗？', category: 'specialDiathersis', weight: 2 },
+            { id: 'q37', text: '您没有感冒时也会鼻塞、流鼻涕吗？', category: 'specialDiathersis', weight: 2 },
+            { id: 'q38', text: '您有因季节变化、温度变化或异味等原因而咳喘的现象吗？', category: 'specialDiathersis', weight: 1 },
+            { id: 'q39', text: '您容易过敏（对药物、食物、花粉等）吗？', category: 'specialDiathersis', weight: 1 },
+            { id: 'q40', text: '您的皮肤容易起荨麻疹（风团、风疹块）吗？', category: 'specialDiathersis', weight: 1 }
+        ];
+
+        let currentQuestion = 0;
+        let answers = {};
+        
+        // 初始化问题
+        function initQuestions() {
+            showQuestion(currentQuestion);
+        }
+        
+        // 显示问题
+        function showQuestion(index) {
+            const container = document.getElementById('question-container');
+            const question = questions[index];
+            
+            let html = `
+                <div class="question-section">
+                    <div class="question">
+                        <h3>问题 ${index + 1}/${questions.length}：${question.text}</h3>
+                        <div class="options">
+                            <div class="option" data-value="1">没有</div>
+                            <div class="option" data-value="2">很少</div>
+                            <div class="option" data-value="3">有时</div>
+                            <div class="option" data-value="4">经常</div>
+                            <div class="option" data-value="5">总是</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (index === questions.length - 1) {
+                html += `<button class="btn" id="analyze-btn">🔍 开始分析我的体质</button>`;
+            } else {
+                html += `<button class="btn" id="next-btn">下一题</button>`;
+            }
+            
+            container.innerHTML = html;
+            
+            // 绑定选项点击事件
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    answers[question.id] = parseInt(this.dataset.value);
+                    
+                    // 显示下一题按钮
+                    if (index < questions.length - 1) {
+                        document.getElementById('next-btn').style.display = 'block';
+                    } else {
+                        document.getElementById('analyze-btn').style.display = 'block';
+                    }
+                });
+            });
+            
+            // 绑定下一题按钮
+            if (index < questions.length - 1) {
+                document.getElementById('next-btn').addEventListener('click', function() {
+                    if (answers[question.id]) {
+                        currentQuestion++;
+                        showQuestion(currentQuestion);
+                    } else {
+                        alert('请先选择答案！');
+                    }
+                });
+                document.getElementById('next-btn').style.display = 'none';
+            }
+            
+            // 绑定分析按钮
+            if (index === questions.length - 1) {
+                document.getElementById('analyze-btn').addEventListener('click', analyzeConstitution);
+                document.getElementById('analyze-btn').style.display = 'none';
+            }
+        }
+        
+        // 分析体质（优化版）
+        function analyzeConstitution() {
+            // 1. 计算各体质得分
+            const scores = {
+                qiDeficient: 0,
+                yangDeficient: 0,
+                yinDeficient: 0,
+                phlegmDampness: 0,
+                dampHeat: 0,
+                bloodStasis: 0,
+                qiStagnation: 0,
+                specialDiathersis: 0
+            };
+            
+            // 2. 根据答案计算得分
+            questions.forEach(question => {
+                const answer = answers[question.id] || 0;
+                scores[question.category] += answer * question.weight;
+            });
+            
+            // 3. 确定主要体质和严重程度
+            let mainConstitution = 'qiDeficient';
+            let maxScore = 0;
+            
+            for (const constitution in scores) {
+                if (scores[constitution] > maxScore) {
+                    maxScore = scores[constitution];
+                    mainConstitution = constitution;
+                }
+            }
+            
+            // 4. 确定严重程度（轻/中/重）
+            let severity = 'mild';
+            if (maxScore > 30) severity = 'severe';
+            else if (maxScore > 20) severity = 'moderate';
+            
+            // 5. 生成详细报告
+            const report = generateDetailedReport(mainConstitution, severity, scores);
+            
+            // 6. 显示报告
+            showReport(report);
+        }
+        
+        // 生成详细报告（优化版）
+        function generateDetailedReport(constitution, severity, scores) {
+            const report = {
+                constitution: constitution,
+                severity: severity,
+                scores: scores,
+                tcmAnalysis: generateTcmAnalysis(constitution, severity),
+                simpleExplanation: generateSimpleExplanation(constitution),
+                detailedAnalysis: generateDetailedAnalysis(constitution, severity),
+                treatmentPlan: generateTreatmentPlan(constitution, severity),
+                lifestyleAdvice: generateLifestyleAdvice(constitution),
+                warnings: generateWarnings(constitution)
+            };
+            
+            return report;
+        }
+        
+        // 老中医四诊合参分析
+        function generateTcmAnalysis(constitution, severity) {
+            const analysis = {
+                qiDeficient: {
+                    mild: "望诊：面色淡白，舌淡红，苔薄白；闻诊：声音低微；问诊：疲乏无力，气短懒言；切诊：脉虚弱。综合判断：气机不足，脏腑功能低下。",
+                    moderate: "望诊：面色晄白，舌质淡，舌体胖大有齿痕；闻诊：声音低怯；问诊：疲乏明显，动则气喘；切诊：脉细弱。综合判断：气虚明显，中气不足。",
+                    severe: "望诊：面色苍白，舌质淡嫩，舌边有齿痕；闻诊：声低息微；问诊：极度疲乏，稍动即喘；切诊：脉沉细无力。综合判断：元气大伤，亟需调理。"
+                },
+                yangDeficient: {
+                    mild: "望诊：面色晄白，舌淡胖；闻诊：声音低微；问诊：手脚发凉，怕冷；切诊：脉沉迟。综合判断：阳气不足，温煦功能减弱。",
+                    moderate: "望诊：面色苍白，舌质淡胖，苔白滑；闻诊：声低息微；问诊：四肢厥冷，畏寒喜暖；切诊：脉沉迟无力。综合判断：阳虚明显，内寒丛生。",
+                    severe: "望诊：面色黧黑，舌质淡紫，苔白滑；闻诊：声低息微；问诊：全身畏寒，得衣被不减；切诊：脉沉迟微弱。综合判断：阳气衰微，命门火衰。"
+                }
+                // ... 其他体质的分析
+            };
+            
+            return analysis[constitution] ? analysis[constitution][severity] : "需要进一步辨证分析。";
+        }
+        
+        // 通俗易懂解释
+        function generateSimpleExplanation(constitution) {
+            const explanations = {
+                qiDeficient: "您的身体就像手机电量不足（只有20%），总是感觉累，没精神，需要充电（补气）。",
+                yangDeficient: "您的身体像小火炉火力不够，总是怕冷，手脚冰凉，需要加燃料（补阳）。",
+                yinDeficient: "您的身体像干涸的河流，缺乏滋润，总是口干舌燥，需要补水（滋阴）。",
+                phlegmDampness: "您的身体像潮湿的房间，湿气重，身体沉重，需要除湿（化痰祛湿）。",
+                dampHeat: "您的身体像夏天的闷热天气，又湿又热，需要清热利湿。",
+                bloodStasis: "您的身体像河流有淤泥堵塞，血液循环不畅，需要活血化瘀。",
+                qiStagnation: "您的身体像交通堵塞，气机不畅，情绪低落，需要疏肝理气。",
+                specialDiathersis: "您的身体像敏感的花朵，容易过敏，需要调和营卫，增强抵抗力。"
+            };
+            
+            return explanations[constitution] || "您的体质需要进一步分析。";
+        }
+        
+        // 体质细分说明
+        function generateDetailedAnalysis(constitution, severity) {
+            const analysis = {
+                qiDeficient: {
+                    mild: "您的气虚体质属于轻度：主要症状是容易疲乏，但休息后能缓解。调理起来相对容易，坚持1-2个月会有明显改善。建议从饮食和运动入手。",
+                    moderate: "您的气虚体质属于中度：症状明显，不仅容易疲乏，还伴有气短、头晕等症状。需要系统调理3-6个月，建议配合中药调理。",
+                    severe: "您的气虚体质属于重度：症状严重，极度疲乏，稍动即喘，已经影响生活质量。建议尽快就医，配合中药和系统调理，可能需要3-6个月才能明显改善。"
+                }
+                // ... 其他体质的详细分析
+            };
+            
+            return analysis[constitution] ? analysis[constitution][severity] : "体质分析需要进一步完善。";
+        }
+        
+        // 分阶段调理方案
+        function generateTreatmentPlan(constitution, severity) {
+            const plans = {
+                qiDeficient: {
+                    phase1: "第1-2周：补气健脾，推荐四君子汤加减（人参、白术、茯苓、甘草）",
+                    phase2: "第3-4周：益气升阳，推荐补中益气汤（黄芪、人参、白术、当归等）",
+                    phase3: "第5-8周：巩固调理，推荐参苓白术散（人参、茯苓、白术、山药等）"
+                }
+                // ... 其他体质的调理方案
+            };
+            
+            return plans[constitution] || { phase1: "请及时就医，制定个性化方案。" };
+        }
+        
+        // 生活调理建议
+        function generateLifestyleAdvice(constitution) {
+            const advice = {
+                qiDeficient: {
+                    diet: "推荐：山药、红枣、小米、鸡肉、牛肉、糯米。避免：生冷寒凉食物，如西瓜、苦瓜、冷饮。",
+                    exercise: "推荐：太极拳、八段锦、散步。避免：剧烈运动、过度出汗。",
+                    sleep: "保证充足睡眠，避免熬夜，中午最好能午休30分钟。",
+                    emotions: "保持心情舒畅，避免过度思虑，适当放松身心。"
+                }
+                // ... 其他体质的建议
+            };
+            
+            return advice[constitution] || {};
+        }
+        
+        // 注意事项
+        function generateWarnings(constitution) {
+            const warnings = {
+                qiDeficient: "⚠️ 注意事项：1. 避免过度劳累；2. 避免剧烈运动；3. 避免生冷食物；4. 如果症状加重，请及时就医。",
+                yangDeficient: "⚠️ 注意事项：1. 避免寒冷环境；2. 避免生冷食物；3. 注意保暖；4. 严重者请及时就医。",
+                yinDeficient: "⚠️ 注意事项：1. 避免辛辣食物；2. 避免熬夜；3. 注意情绪调节；4. 如果症状加重，请及时就医。"
+            };
+            
+            return warnings[constitution] || "请根据个人情况调整，必要时咨询专业医师。";
+        }
+        
+        // 显示报告
+        function showReport(report) {
+            const container = document.getElementById('result-container');
+            const questionContainer = document.getElementById('question-container');
+            
+            questionContainer.style.display = 'none';
+            container.classList.add('show');
+            
+            let html = `
+                <div class="constitution-card">
+                    <h2>📋 中医体质分析报告</h2>
+                    <div class="severity-badge severity-${report.severity}">${getSeverityText(report.severity)}</div>
+                    <h3>您的体质是：${getConstitutionName(report.constitution)}</h3>
+                </div>
+                
+                <div class="analysis-section tcm-analysis">
+                    <h3>🔍 老中医四诊合参分析</h3>
+                    <p>${report.tcmAnalysis}</p>
+                </div>
+                
+                <div class="analysis-section simple-explanation">
+                    <h3>💡 通俗易懂的解释</h3>
+                    <p>${report.simpleExplanation}</p>
+                </div>
+                
+                <div class="analysis-section detailed-analysis">
+                    <h3>📊 体质细分说明</h3>
+                    <p>${report.detailedAnalysis}</p>
+                </div>
+                
+                <div class="analysis-section treatment-plan">
+                    <h3>💊 分阶段调理方案</h3>
+                    <p><strong>第1-2周：</strong>${report.treatmentPlan.phase1}</p>
+                    <p><strong>第3-4周：</strong>${report.treatmentPlan.phase2}</p>
+                    <p><strong>第5-8周：</strong>${report.treatmentPlan.phase3}</p>
+                </div>
+                
+                <div class="analysis-section lifestyle-advice">
+                    <h3>🏃 生活调理建议</h3>
+                    <p><strong>饮食：</strong>${report.lifestyleAdvice.diet}</p>
+                    <p><strong>运动：</strong>${report.lifestyleAdvice.exercise}</p>
+                    <p><strong>作息：</strong>${report.lifestyleAdvice.sleep}</p>
+                    <p><strong>情绪：</strong>${report.lifestyleAdvice.emotions}</p>
+                </div>
+                
+                <div class="analysis-section warnings">
+                    <h3>⚠️ 注意事项</h3>
+                    <p>${report.warnings}</p>
+                </div>
+                
+                <div class="contact-info">
+                    <p>📞 体质调理需要个性化方案，建议咨询专业中医师进行面诊。</p>
+                    <p>📱 扫码添加微信，获取一对一调理建议</p>
+                    <div class="qr-code">个人微信二维码</div>
+                    <p>微信号：Lv-yong-jun</p>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // 辅助函数
+        function getConstitutionName(type) {
+            const names = {
+                qiDeficient: '气虚体质',
+                yangDeficient: '阳虚体质',
+                yinDeficient: '阴虚体质',
+                phlegmDampness: '痰湿体质',
+                dampHeat: '湿热体质',
+                bloodStasis: '血瘀体质',
+                qiStagnation: '气郁体质',
+                specialDiathersis: '特禀体质'
+            };
+            return names[type] || '未确定';
+        }
+        
+        function getSeverityText(level) {
+            const texts = {
+                mild: '轻度',
+                moderate: '中度',
+                severe: '重度'
+            };
+            return texts[level] || '未分级';
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            initQuestions();
+        };
+    </script>
+</body>
+</html>
