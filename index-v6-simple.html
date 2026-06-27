@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中医体质自测 - 吕勇军【平安金融科技集团】</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 100%);
+  color: #333;
+  line-height: 1.6;
+  padding: 12px;
+  min-height: 100vh;
+}
+.header {
+  text-align: center;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+  border-radius: 16px;
+  color: white;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(192,57,43,0.3);
+}
+.header h1 { font-size: 22px; margin-bottom: 6px; }
+.header p { font-size: 13px; opacity: 0.9; }
+
+.content { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.question { margin-bottom: 20px; }
+.question h3 { font-size: 16px; color: #c0392b; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.option:hover { background: #e9ecef; }
+.option.selected { background: #c0392b; color: white; border-color: #c0392b; }
+
+.btn {
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  display: block;
+  margin: 30px auto;
+  box-shadow: 0 4px 12px rgba(192,57,43,0.3);
+}
+
+.result { display: none; padding: 20px; }
+.result.show { display: block; }
+.card {
+  background: #f0f8ff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-left: 4px solid #c0392b;
+}
+.card h2 { color: #c0392b; font-size: 20px; margin-bottom: 12px; }
+.card h3 { color: #333; font-size: 16px; margin-bottom: 10px; }
+.card p { margin-bottom: 10px; line-height: 1.8; }
+
+.qrcode {
+  text-align: center;
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+.qrcode img { width: 150px; height: 150px; }
+.qrcode p { font-size: 14px; color: #666; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏥 中医体质自测</h1>
+  <p>专业测评 · 结合老中医分析思路</p>
+</div>
+
+<div class="content">
+  <div id="quiz">
+    <div class="question" id="q1">
+      <h3>问题 1/10：您容易疲乏吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(1, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(1, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(1, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(1, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(1, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q2" style="display:none;">
+      <h3>问题 2/10：您容易气短（呼吸短促）吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(2, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(2, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(2, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(2, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(2, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q3" style="display:none;">
+      <h3>问题 3/10：您容易出汗吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(3, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(3, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(3, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(3, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(3, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q4" style="display:none;">
+      <h3>问题 4/10：您怕冷吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(4, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(4, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(4, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(4, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(4, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q5" style="display:none;">
+      <h3>问题 5/10：您手脚心热吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(5, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(5, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(5, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(5, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(5, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q6" style="display:none;">
+      <h3>问题 6/10：您容易心情烦躁吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(6, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(6, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(6, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(6, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(6, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q7" style="display:none;">
+      <h3>问题 7/10：您舌苔厚腻吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(7, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(7, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(7, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(7, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(7, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q8" style="display:none;">
+      <h3>问题 8/10：您容易过敏吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(8, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(8, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(8, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(8, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(8, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q9" style="display:none;">
+      <h3>问题 9/10：您容易便秘吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(9, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(9, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(9, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(9, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(9, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <div class="question" id="q10" style="display:none;">
+      <h3>问题 10/10：您容易失眠吗？</h3>
+      <div class="options">
+        <div class="option" onclick="selectOption(10, 1, this)">没有</div>
+        <div class="option" onclick="selectOption(10, 2, this)">很少</div>
+        <div class="option" onclick="selectOption(10, 3, this)">有时</div>
+        <div class="option" onclick="selectOption(10, 4, this)">经常</div>
+        <div class="option" onclick="selectOption(10, 5, this)">总是</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="showResult()" id="submitBtn" style="display:none;">查看我的体质报告</button>
+  </div>
+
+  <div id="result" class="result">
+    <div class="card">
+      <h2>🏥 您的中医体质分析报告</h2>
+      <h3 id="typeTitle">体质类型：气虚体质（轻度）</h3>
+      
+      <p><strong>🔍 老中医四诊合参分析：</strong></p>
+      <p><strong>望诊：</strong>面色淡白无华，舌质淡红，舌苔薄白，精神不振。</p>
+      <p><strong>闻诊：</strong>声音低微，少气懒言，语声无力。</p>
+      <p><strong>问诊：</strong>容易疲乏，气短懒言，食欲不振，易出汗。</p>
+      <p><strong>切诊：</strong>脉象虚弱无力，舌质淡。</p>
+      <p><strong>综合判断：</strong>气血不足，脏腑功能偏弱。</p>
+
+      <p><strong>💡 通俗比喻解释：</strong>您的身体就像手机电量只有20%，总是感觉累，需要充电（补气血）。</p>
+
+      <p><strong>📊 体质分级：</strong>轻度气虚，症状较轻，调理1-2个月会有明显改善。</p>
+
+      <p><strong>💊 分阶段调理方案（8周）：</strong></p>
+      <p><strong>第1-2周：</strong>补气养血，推荐黄芪、党参、红枣、小米等食物。</p>
+      <p><strong>第3-4周：</strong>健脾养胃，配合适当运动（散步、太极）。</p>
+      <p><strong>第5-6周：</strong>调整作息，保证充足睡眠，避免熬夜。</p>
+      <p><strong>第7-8周：</strong>巩固疗效，定期复查，调整方案。</p>
+
+      <p><strong>🥗 饮食建议：</strong>多吃补气食物（黄芪、党参、红枣、小米、山药），避免生冷食物。</p>
+
+      <p><strong>🏃 运动建议：</strong>适度运动（散步、太极、瑜伽），避免剧烈运动。</p>
+
+      <p><strong>⚠️ 注意事项：</strong>避免过度劳累和生冷食物，保持心情舒畅。</p>
+    </div>
+
+    <div class="qrcode">
+      <p>📱 扫码咨询专业中医师</p>
+      <p>吕勇军【平安金融科技集团】</p>
+      <img src="qrcode-wechat.jpg" alt="微信二维码">
+    </div>
+  </div>
+</div>
+
+<script>
+var answers = {};
+
+function selectOption(qNum, value, el) {
+  answers[qNum] = value;
+  var parent = el.parentElement;
+  parent.querySelectorAll('.option').forEach(function(opt) {
+    opt.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  
+  if (qNum < 10) {
+    document.getElementById('q' + qNum).style.display = 'none';
+    document.getElementById('q' + (qNum + 1)).style.display = 'block';
+  } else {
+    document.getElementById('submitBtn').style.display = 'block';
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').classList.add('show');
+}
+</script>
+
+</body>
+</html>
