@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>涓尰浣撹川鑷祴</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .content { padding: 30px; }
+        .question { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; }
+        .options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .option { background: white; border: 2px solid #e0e0e0; padding: 10px 20px; border-radius: 25px; cursor: pointer; }
+        .option.selected { background: #667eea; color: white; border-color: #667eea; }
+        .btn { background: #667eea; color: white; border: none; padding: 15px 40px; border-radius: 25px; font-size: 18px; cursor: pointer; display: block; margin: 30px auto; }
+        .result { display: none; padding: 30px; }
+        .result.show { display: block; }
+        .card { background: #f0f8ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>馃彞 涓尰浣撹川鑷祴</h1>
+            <p>涓撲笟鐗?- 缁撳悎鑰佷腑鍖诲垎鏋愭€濊矾</p>
+        </div>
+        <div class="content">
+            <div id="q1" class="question">
+                <h3>闂 1/10锛氭偍瀹规槗鐤蹭箯鍚楋紵</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 1)">娌℃湁</div>
+                    <div class="option" onclick="selectOption(this, 2)">寰堝皯</div>
+                    <div class="option" onclick="selectOption(this, 3)">鏈夋椂</div>
+                    <div class="option" onclick="selectOption(this, 4)">缁忓父</div>
+                    <div class="option" onclick="selectOption(this, 5)">鎬绘槸</div>
+                </div>
+            </div>
+            <button class="btn" onclick="showResult()">鏌ョ湅鎴戠殑浣撹川鎶ュ憡</button>
+        </div>
+        <div id="result" class="result">
+            <div class="card">
+                <h2>馃搵 鎮ㄧ殑浣撹川鍒嗘瀽鎶ュ憡</h2>
+                <h3>浣撹川绫诲瀷锛氭皵铏氫綋璐紙杞诲害锛?/h3>
+                <p><strong>馃攳 鑰佷腑鍖诲垎鏋愶細</strong>鏈涜瘖闈㈣壊娣＄櫧锛岃垖娣＄孩锛涢椈璇婂０闊充綆寰紱闂瘖鐤蹭箯鏃犲姏锛涘垏璇婅剦铏氬急銆傜患鍚堝垽鏂細姘旀満涓嶈冻銆?/p>
+                <p><strong>馃挕 閫氫織瑙ｉ噴锛?/strong>鎮ㄧ殑韬綋鍍忔墜鏈虹數閲忎笉瓒筹紙鍙湁20%锛夛紝鎬绘槸鎰熻绱紝闇€瑕佸厖鐢碉紙琛ユ皵锛夈€?/p>
+                <p><strong>馃搳 缁嗗垎璇存槑锛?/strong>杞诲害姘旇櫄锛岀棁鐘惰緝杞伙紝璋冪悊1-2涓湀浼氭湁鏄庢樉鏀瑰杽銆?/p>
+                <p><strong>馃拪 璋冪悊鏂规锛?/strong>鎺ㄨ崘灞辫嵂銆佺孩鏋ｃ€佸皬绫崇瓑琛ユ皵椋熺墿锛岄厤鍚堝お鏋佹嫵杩愬姩銆?/p>
+                <p><strong>鈿狅笍 娉ㄦ剰锛?/strong>閬垮厤杩囧害鍔崇疮鍜岀敓鍐烽鐗┿€?/p>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <p>馃摫 鎵爜鍜ㄨ涓撲笟涓尰甯?/p>
+                <p>鍚曞媷鍐涖€愬钩瀹夐噾铻嶇鎶€闆嗗洟銆?/p>
+            </div>
+        </div>
+    </div>
+    <script>
+        function selectOption(el, value) {
+            const parent = el.parentElement;
+            parent.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+        function showResult() {
+            document.querySelector('.content').style.display = 'none';
+            document.getElementById('result').classList.add('show');
+        }
+    </script>
+</body>
+</html>
