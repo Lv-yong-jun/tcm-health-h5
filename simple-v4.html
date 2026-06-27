@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中医体质自测 - 专业版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.container{max-width:800px;margin:0 auto;background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden}
+.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:40px 30px;text-align:center}
+.header h1{font-size:28px;margin-bottom:10px}
+.content{padding:30px}
+#progress{text-align:center;color:#667eea;font-size:18px;margin-bottom:25px;font-weight:bold}
+.question{background:#f8f9fa;padding:25px;border-radius:15px;border-left:5px solid #667eea}
+.question h3{color:#333;margin-bottom:20px;font-size:20px;line-height:1.6}
+.opt{display:flex;flex-wrap:wrap;gap:10px}
+.btn-opt{background:white;border:2px solid #e0e0e0;padding:14px 10px;border-radius:25px;cursor:pointer;transition:all 0.3s;font-size:15px;flex:1;min-width:70px;text-align:center;user-select:none}
+.btn-opt:hover{border-color:#667eea;background:#f0f4ff}
+.btn-opt.on{border-color:#667eea;background:#667eea;color:white;font-weight:bold}
+.btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:16px 40px;border-radius:30px;font-size:18px;font-weight:bold;cursor:pointer;display:block;margin:30px auto;transition:all 0.3s;box-shadow:0 5px 20px rgba(102,126,234,0.4)}
+.btn:hover{transform:translateY(-2px)}
+.btn:disabled{background:#ccc;cursor:not-allowed;box-shadow:none}
+.result{padding:30px;display:none}
+.result.on{display:block}
+.card{background:linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%);padding:30px;border-radius:20px;margin-bottom:30px}
+.card h2{color:#d32f2f;margin-bottom:20px;font-size:26px}
+.tag{display:inline-block;padding:8px 20px;border-radius:20px;font-size:16px;font-weight:bold;margin-bottom:20px}
+.tag-grn{background:#4caf50;color:white}
+.tag-org{background:#ff9800;color:white}
+.tag-red{background:#f44336;color:white}
+.box{background:white;padding:25px;border-radius:15px;margin-bottom:25px}
+.box h3{color:#667eea;margin-bottom:18px;font-size:20px;border-bottom:3px solid #eee;padding-bottom:12px}
+.box p,.box li{line-height:1.9;font-size:16px;margin-bottom:12px}
+.box ul{margin:10px 0 10px 20px}
+.foot{text-align:center;padding:25px;background:#f5f5f5;border-radius:15px;margin-top:25px}
+.foot p{font-size:16px;margin-bottom:12px}
+.foot .big{font-size:22px;font-weight:bold;color:#667eea}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🏥 中医体质自测</h1>
+    <p>专业版 - 基于国家中医药管理局标准</p>
+  </div>
+  <div class="content" id="quiz">
+    <div id="progress">问题 1/40</div>
+    <div id="question-box"></div>
+    <button class="btn" id="next-btn" disabled>下一题</button>
+  </div>
+  <div class="result" id="result-box">
+    <div class="card">
+      <h2>📋 您的中医体质分析报告</h2>
+      <div id="report-content"></div>
+    </div>
+    <div class="foot">
+      <p>📱 想要个性化调理方案？</p>
+      <p class="big">扫码咨询专业中医师</p>
+      <div style="background:white;padding:20px;border-radius:10px;margin-top:15px">
+        <p>联系人：吕勇军【平安金融科技集团】</p>
+        <p style="color:#888;font-size:14px;margin-top:10px">提供中医体质调理+健康管理+保险规划一站式服务</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+var qs=[
+{q:1,t:"您容易疲乏吗？",c:"气虚"},
+{q:2,t:"您容易气短（呼吸短促）吗？",c:"气虚"},
+{q:3,t:"您容易头晕或站起时头晕吗？",c:"气虚"},
+{q:4,t:"您容易感冒吗？",c:"气虚"},
+{q:5,t:"您喜欢安静、懒得说话吗？",c:"气虚"},
+{q:6,t:"您手脚发凉吗？",c:"阳虚"},
+{q:7,t:"您胃脘部、背部或腰膝怕冷吗？",c:"阳虚"},
+{q:8,t:"您比别人更容易怕冷吗？",c:"阳虚"},
+{q:9,t:"您吃（喝）凉的东西会不舒服吗？",c:"阳虚"},
+{q:10,t:"您受凉或吃凉的东西容易腹泻吗？",c:"阳虚"},
+{q:11,t:"您手心脚心发热吗？",c:"阴虚"},
+{q:12,t:"您皮肤或口唇干吗？",c:"阴虚"},
+{q:13,t:"您口唇的颜色比一般人红吗？",c:"阴虚"},
+{q:14,t:"您容易便秘或大便干燥吗？",c:"阴虚"},
+{q:15,t:"您面部两颧潮红或偏红吗？",c:"阴虚"},
+{q:16,t:"您感到胸闷或腹部胀满吗？",c:"痰湿"},
+{q:17,t:"您感到身体沉重不轻松吗？",c:"痰湿"},
+{q:18,t:"您腹部肥满松软吗？",c:"痰湿"},
+{q:19,t:"您额部油脂分泌多吗？",c:"痰湿"},
+{q:20,t:"您上眼睑比别人肿吗？",c:"痰湿"},
+{q:21,t:"您面部或鼻部有油腻感吗？",c:"湿热"},
+{q:22,t:"您容易生痤疮或疮疖吗？",c:"湿热"},
+{q:23,t:"您感到口苦或嘴里有异味吗？",c:"湿热"},
+{q:24,t:"您大便黏滞不爽、有解不尽的感觉吗？",c:"湿热"},
+{q:25,t:"您小便时尿道有发热感、尿色浓吗？",c:"湿热"},
+{q:26,t:"您皮肤在不知不觉中出现青紫瘀斑吗？",c:"血瘀"},
+{q:27,t:"您两颧部有细微红丝吗？",c:"血瘀"},
+{q:28,t:"您身体上有哪里疼痛吗？",c:"血瘀"},
+{q:29,t:"您面色晦暗或容易出现褐斑吗？",c:"血瘀"},
+{q:30,t:"您容易有黑眼圈吗？",c:"血瘀"},
+{q:31,t:"您感到闷闷不乐、情绪低沉吗？",c:"气郁"},
+{q:32,t:"您容易精神紧张、焦虑不安吗？",c:"气郁"},
+{q:33,t:"您多愁善感、感情脆弱吗？",c:"气郁"},
+{q:34,t:"您容易感到害怕或受到惊吓吗？",c:"气郁"},
+{q:35,t:"您胁肋部或乳房胀痛吗？",c:"气郁"},
+{q:36,t:"您没有感冒时也会打喷嚏吗？",c:"特禀"},
+{q:37,t:"您没有感冒时也会鼻塞、流鼻涕吗？",c:"特禀"},
+{q:38,t:"您有因季节或温度变化而咳喘的现象吗？",c:"特禀"},
+{q:39,t:"您容易过敏吗？",c:"特禀"},
+{q:40,t:"您的皮肤容易起荨麻疹吗？",c:"特禀"}
+];
+var cur=0;
+var ans={};
+var opts=["没有（0分）","很少（1分）","有时（2分）","经常（3分）","总是（4分）"];
+
+function render(){
+ var q=qs[cur];
+ document.getElementById("progress").textContent="问题 "+(cur+1)+"/40";
+ var html='<div class="question"><h3>问题 '+(cur+1)+'/40：'+q.t+'</h3><div class="opt">';
+ for(var i=0;i<5;i++){
+  var val=i+1;
+  html+='<div class="btn-opt" onclick="sel(this,'+val+')">'+opts[i]+'</div>';
+ }
+ html+='</div></div>';
+ document.getElementById("question-box").innerHTML=html;
+ var btn=document.getElementById("next-btn");
+ btn.disabled=true;
+ btn.textContent=cur<39?"下一题":"查看报告";
+ btn.style.display="block";
+}
+
+function sel(el,v){
+ var p=el.parentElement;
+ var children=p.querySelectorAll(".btn-opt");
+ for(var i=0;i<children.length;i++) children[i].classList.remove("on");
+ el.classList.add("on");
+ ans[cur]=v;
+ document.getElementById("next-btn").disabled=false;
+}
+
+function showResult(){
+ document.getElementById("quiz").style.display="none";
+ document.getElementById("result-box").classList.add("on");
+ var scores={气虚:0,阳虚:0,阴虚:0,痰湿:0,湿热:0,血瘀:0,气郁:0,特禀:0};
+ for(var i=0;i<qs.length;i++){
+  if(ans[i]!=null) scores[qs[i].c]+=(ans[i]-1);
+ }
+ var max=0,main="气虚";
+ for(var k in scores){
+  if(scores[k]>max){max=scores[k];main=k;}
+ }
+ var level=max<=8?"轻度":max<=16?"中度":"重度";
+ var tagClass=max<=8?"tag-grn":max<=16?"tag-org":"tag-red";
+ var info={
+ 气虚:{ana:"望：面色淡白，舌淡红；闻：声音低微；问：疲乏无力；切：脉虚弱",met:"您的身体像电量30%的手机：总觉得不够力，需要充电（补气）",pla:"第1-2周：山药小米粥+红枣；第3-4周：党参白术茶+太极30分；第5-8周：人参+艾灸足三里",foo:"宜：山药/红枣/小米/牛肉；忌：冰水/冷饮/萝卜",exc:"宜：太极/八段锦/散步；忌：剧烈运动"},
+ 阳虚:{ana:"望：面色晄白，舌淡胖；闻：语声低弱；问：畏寒肢冷；切：脉沉迟",met:"您的身体像暖气不足的空调：总是感觉冷，需要加足火力",pla:"第1-2周：生姜红糖水+羊肉汤；第3-4周：肉桂艾灸关元穴；第5-8周：鹿茸+温阳泡脚",foo:"宜：羊肉/韭菜/核桃/桂圆；忌：生冷/冰镇/西瓜",exc:"宜：慢跑/快走/晒太阳；忌：游泳/冷水浴"},
+ 阴虚:{ana:"望：面色潮红，舌红少津；闻：口干咽燥；问：五心烦热；切：脉细数",met:"您的身体像缺水的发动机：总是发热干燥，需要加冷却液",pla:"第1-2周：银耳莲子汤+百合粥；第3-4周：麦冬玉竹茶+早睡养阴；第5-8周：西洋参+避免熬夜",foo:"宜：银耳/百合/梨/藕/鸭肉；忌：辛辣/烧烤/羊肉",exc:"宜：瑜伽/游泳/太极；忌：高温环境/剧烈运动"},
+ 痰湿:{ana:"望：形体肥胖，舌苔白腻；闻：口中黏腻；问：胸闷痰多；切：脉滑",met:"您的身体像堵塞的下水道：湿气重痰多，需要疏通清理",pla:"第1-2周：薏米红豆粥+陈皮茶；第3-4周：茯苓白术健脾+快走40分；第5-8周：荷叶茶+控制体重",foo:"宜：薏米/红豆/冬瓜/荷叶；忌：油腻/甜食/肥肉",exc:"宜：快走/慢跑/游泳；忌：久坐/潮湿环境"},
+ 湿热:{ana:"望：面垢油光，舌红苔黄；闻：口气重；问：口苦尿黄；切：脉滑数",met:"您的身体像过热的发动机：又湿又热，需要降温除湿",pla:"第1-2周：绿豆汤+苦瓜茶；第3-4周：茵陈栀子清热+避免辛辣；第5-8周：荷叶冬瓜汤+保持清爽",foo:"宜：绿豆/苦瓜/冬瓜/薏米；忌：辛辣/烧烤/酒/羊肉",exc:"宜：游泳/慢跑/瑜伽；忌：高温运动/桑拿"},
+ 血瘀:{ana:"望：面色晦暗，舌质紫暗；闻：无特殊；问：刺痛固定；切：脉涩",met:"您的身体像堵塞的河流：血流不畅，需要疏通河道",pla:"第1-2周：山楂红糖水+玫瑰花茶；第3-4周：当归川芎活血+按摩穴位；第5-8周：适量红酒+避免久坐",foo:"宜：山楂/玫瑰花/红糖/黑木耳；忌：生冷/油腻/过咸",exc:"宜：快走/跳舞/太极拳；忌：久坐/剧烈运动"},
+ 气郁:{ana:"望：神情抑郁，舌淡红；闻：太息频作；问：胸闷胁胀；切：脉弦",met:"您的身体像憋气的发动机：气不顺，需要疏通排气",pla:"第1-2周：玫瑰花茶+陈皮粥；第3-4周：柴胡香附疏肝+户外活动；第5-8周：冥想瑜伽+心情愉悦",foo:"宜：玫瑰花/陈皮/佛手/金桔；忌：油腻/咖啡/浓茶",exc:"宜：瑜伽/舞蹈/户外散步；忌：独处/情绪压抑"},
+ 特禀:{ana:"本测试显示特禀体质倾向，建议进一步咨询专业医生进行过敏原检测",met:"您的身体对外界刺激较为敏感，需要注意避免过敏原",pla:"第1-2周：记录饮食日记排查过敏原；第3-4周：补充益生菌调理肠道；第5-8周：增强体质，避免已知过敏原",foo:"宜：根据过敏原检测结果调整饮食；忌：已知过敏食物",exc:"宜：游泳/瑜伽/太极；忌：花粉多的环境"}
+ };
+ var d=info[main]||info.气虚;
+ document.getElementById("report-content").innerHTML=
+  '<h3>'+main+'（'+level+'）</h3>'+
+  '<span class="tag '+tagClass+'">'+level+main+'</span>'+
+  '<div class="box"><h3>🔍 老中医四诊合参分析</h3><p>'+d.ana+'</p></div>'+
+  '<div class="box"><h3>💡 通俗比喻解释</h3><p>'+d.met+'</p></div>'+
+  '<div class="box"><h3>💊 分阶段调理方案</h3><p>'+d.pla+'</p></div>'+
+  '<div class="box"><h3>🥗 饮食建议</h3><p>'+d.foo+'</p></div>'+
+  '<div class="box"><h3>🏃 运动建议</h3><p>'+d.exc+'</p></div>'+
+  '<div class="box" style="background:#ffebee"><h3>⚠️ 注意事项</h3><ul>'+
+  '<li>本测试仅供参考，不能替代专业医疗诊断</li>'+
+  '<li>如症状严重，请及时就医</li>'+
+  '<li>调理方案需根据个人情况调整</li></ul></div>';
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.getElementById("next-btn").onclick=function(){
+ if(cur<39){cur++;render();}else{showResult();}
+};
+
+render();
+</script>
+</body>
+</html>
