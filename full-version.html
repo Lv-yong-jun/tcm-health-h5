@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中医体质自测 - 专业版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .header p { opacity: 0.95; font-size: 16px; }
+        .content { padding: 30px; }
+        .question { background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid #667eea; }
+        .question h3 { color: #333; margin-bottom: 20px; font-size: 18px; line-height: 1.6; }
+        .options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .option { background: white; border: 2px solid #e0e0e0; padding: 12px 20px; border-radius: 25px; cursor: pointer; transition: all 0.3s; font-size: 15px; flex: 1; min-width: 90px; text-align: center; user-select: none; }
+        .option:hover { border-color: #667eea; background: #f0f4ff; transform: translateY(-2px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; font-weight: bold; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 18px 50px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; display: block; margin: 40px auto 20px; transition: all 0.3s; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        .result { display: none; padding: 30px; }
+        .result.show { display: block; }
+        .result-card { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .result-card h2 { color: #d32f2f; margin-bottom: 20px; font-size: 28px; }
+        .badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-size: 16px; font-weight: bold; margin-bottom: 20px; }
+        .badge-mild { background: #4caf50; color: white; }
+        .badge-moderate { background: #ff9800; color: white; }
+        .badge-severe { background: #f44336; color: white; }
+        .section { background: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .section h3 { color: #667eea; margin-bottom: 20px; font-size: 22px; border-bottom: 3px solid #f0f0f0; padding-bottom: 12px; }
+        .section p, .section li { line-height: 1.8; font-size: 16px; margin-bottom: 10px; }
+        .section ul { margin: 10px 0 10px 20px; }
+        .highlight-box { padding: 15px; background: #fff3cd; border-radius: 10px; margin: 15px 0; }
+        .footer { text-align: center; padding: 30px; background: #f5f5f5; margin-top: 30px; border-radius: 15px; }
+        .contact { margin-top: 20px; padding: 20px; background: white; border-radius: 10px; }
+        .progress { text-align: center; margin: 20px 0; color: #667eea; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 中医体质自测</h1>
+            <p>专业版 - 基于国家中医药管理局标准</p>
+        </div>
+        
+        <div class="content" id="quiz">
+            <div class="progress" id="progress">问题 1/40</div>
+            <div id="question-container"></div>
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>下一题</button>
+            <button class="btn" id="result-btn" onclick="showResult()" style="display:none;">📋 查看我的体质分析报告</button>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-card">
+                <h2>📋 您的中医体质分析报告</h2>
+                <div id="constitution-result"></div>
+            </div>
+            <div class="footer">
+                <p style="font-size: 18px; margin-bottom: 15px;">📱 想要个性化调理方案？</p>
+                <p style="font-size: 20px; font-weight: bold; color: #667eea;">扫码咨询专业中医师</p>
+                <div class="contact">
+                    <p style="font-size: 16px; margin-top: 10px;">联系人：吕勇军【平安金融科技集团】</p>
+                    <p style="font-size: 14px; color: #666; margin-top: 10px;">提供中医体质调理 + 健康管理 + 保险规划一站式服务</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 40道完整题目
+        const questions = [
+            { id: 1, text: '您容易疲乏吗？', category: 'qiDeficient' },
+            { id: 2, text: '您容易气短（呼吸短促）吗？', category: 'qiDeficient' },
+            { id: 3, text: '您容易头晕或站起时头晕吗？', category: 'qiDeficient' },
+            { id: 4, text: '您容易感冒吗？', category: 'qiDeficient' },
+            { id: 5, text: '您喜欢安静、懒得说话吗？', category: 'qiDeficient' },
+            { id: 6, text: '您手脚发凉吗？', category: 'yangDeficient' },
+            { id: 7, text: '您胃脘部、背部或腰膝怕冷吗？', category: 'yangDeficient' },
+            { id: 8, text: '您比别人更容易怕冷吗？', category: 'yangDeficient' },
+            { id: 9, text: '您吃（喝）凉的东西会不舒服吗？', category: 'yangDeficient' },
+            { id: 10, text: '您受凉或吃凉的东西容易腹泻吗？', category: 'yangDeficient' },
+            { id: 11, text: '您手心脚心发热吗？', category: 'yinDeficient' },
+            { id: 12, text: '您皮肤或口唇干吗？', category: 'yinDeficient' },
+            { id: 13, text: '您口唇的颜色比一般人红吗？', category: 'yinDeficient' },
+            { id: 14, text: '您容易便秘或大便干燥吗？', category: 'yinDeficient' },
+            { id: 15, text: '您面部两颧潮红或偏红吗？', category: 'yinDeficient' },
+            { id: 16, text: '您感到胸闷或腹部胀满吗？', category: 'phlegmDampness' },
+            { id: 17, text: '您感到身体沉重不轻松吗？', category: 'phlegmDampness' },
+            { id: 18, text: '您腹部肥满松软吗？', category: 'phlegmDampness' },
+            { id: 19, text: '您额部油脂分泌多吗？', category: 'phlegmDampness' },
+            { id: 20, text: '您上眼睑比别人肿吗？', category: 'phlegmDampness' },
+            { id: 21, text: '您面部或鼻部有油腻感吗？', category: 'dampnessHeat' },
+            { id: 22, text: '您容易生痤疮或疮疖吗？', category: 'dampnessHeat' },
+            { id: 23, text: '您感到口苦或嘴里有异味吗？', category: 'dampnessHeat' },
+            { id: 24, text: '您大便黏滞不爽、有解不尽的感觉吗？', category: 'dampnessHeat' },
+            { id: 25, text: '您小便时尿道有发热感、尿色浓吗？', category: 'dampnessHeat' },
+            { id: 26, text: '您皮肤在不知不觉中会出现青紫瘀斑吗？', category: 'bloodStasis' },
+            { id: 27, text: '您两颧部有细微红丝吗？', category: 'bloodStasis' },
+            { id: 28, text: '您身体上有哪里疼痛吗？', category: 'bloodStasis' },
+            { id: 29, text: '您面色晦暗或容易出现褐斑吗？', category: 'bloodStasis' },
+            { id: 30, text: '您容易有黑眼圈吗？', category: 'bloodStasis' },
+            { id: 31, text: '您感到闷闷不乐、情绪低沉吗？', category: 'qiStagnation' },
+            { id: 32, text: '您容易精神紧张、焦虑不安吗？', category: 'qiStagnation' },
+            { id: 33, text: '您多愁善感、感情脆弱吗？', category: 'qiStagnation' },
+            { id: 34, text: '您容易感到害怕或受到惊吓吗？', category: 'qiStagnation' },
+            { id: 35, text: '您胁肋部或乳房胀痛吗？', category: 'qiStagnation' },
+            { id: 36, text: '您没有感冒时也会打喷嚏吗？', category: 'special' },
+            { id: 37, text: '您没有感冒时也会鼻塞、流鼻涕吗？', category: 'special' },
+            { id: 38, text: '您有因季节变化、温度变化或异味等原因而咳喘的现象吗？', category: 'special' },
+            { id: 39, text: '您容易过敏吗？', category: 'special' },
+            { id: 40, text: '您的皮肤容易起荨麻疹吗？', category: 'special' }
+        ];
+        
+        let currentQ = 0;
+        let answers = {};
+        
+        function renderQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('progress').textContent = `问题 ${currentQ + 1}/40`;
+            document.getElementById('question-container').innerHTML = `
+                <div class="question">
+                    <h3>问题 ${currentQ + 1}/40：${q.text}</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, 1)">没有（0分）</div>
+                        <div class="option" onclick="selectOption(this, 2)">很少（1分）</div>
+                        <div class="option" onclick="selectOption(this, 3)">有时（2分）</div>
+                        <div class="option" onclick="selectOption(this, 4)">经常（3分）</div>
+                        <div class="option" onclick="selectOption(this, 5)">总是（4分）</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = currentQ < 39 ? '下一题' : '查看报告';
+            document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('result-btn').style.display = 'none';
+        }
+        
+        function selectOption(el, value) {
+            const parent = el.parentElement;
+            parent.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+            answers[currentQ] = value;
+            document.getElementById('next-btn').disabled = false;
+        }
+        
+        function nextQuestion() {
+            if (currentQ < 39) {
+                currentQ++;
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        function showResult() {
+            // 计算各体质得分
+            const scores = {
+                qiDeficient: 0, yangDeficient: 0, yinDeficient: 0,
+                phlegmDampness: 0, dampnessHeat: 0, bloodStasis: 0, qiStagnation: 0
+            };
+            
+            questions.forEach((q, i) => {
+                if (answers[i] && scores[q.category] !== undefined) {
+                    scores[q.category] += (answers[i] - 1);
+                }
+            });
+            
+            // 找出最高分的体质
+            let maxScore = 0;
+            let mainType = '';
+            for (const [type, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    mainType = type;
+                }
+            }
+            
+            // 体质信息
+            const constitutionInfo = {
+                qiDeficient: {
+                    name: '气虚体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊面色淡白，舌淡红；闻诊声音低微；问诊疲乏无力；切诊脉虚弱。综合判断：气机不足，脏腑功能减弱。',
+                    metaphor: '您的身体像一部电量只剩30%的手机：勉强能用，但总觉得不够力，需要经常充电（补气）。',
+                    plan: '第1-2周：山药小米粥+红枣，黄芪炖鸡。第3-4周：党参白术泡茶，太极拳30分钟。第5-8周：适量人参，艾灸足三里。',
+                    food: '推荐：山药、红枣、小米、黄豆、牛肉、茯苓。禁忌：冰水、冷饮、萝卜、山楂。',
+                    exercise: '适合：太极拳、八段锦、散步。避免：剧烈运动、大汗淋漓。'
+                },
+                yangDeficient: {
+                    name: '阳虚体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊面色晄白，舌淡胖；闻诊语声低弱；问诊畏寒肢冷；切诊脉沉迟。综合判断：阳气不足，温煦失职。',
+                    metaphor: '您的身体像一台暖气不足的空调：总是感觉冷，需要加足火力（补阳）。',
+                    plan: '第1-2周：生姜红糖水，羊肉汤。第3-4周：肉桂、附子（需医师指导），艾灸关元穴。第5-8周：鹿茸适量，泡脚温阳。',
+                    food: '推荐：羊肉、韭菜、核桃、桂圆、生姜。禁忌：生冷、冰镇、西瓜、梨。',
+                    exercise: '适合：慢跑、快走、晒太阳。避免：游泳、冷水浴、夜间运动。'
+                },
+                yinDeficient: {
+                    name: '阴虚体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊面色潮红，舌红少津；闻诊口干咽燥；问诊五心烦热；切诊脉细数。综合判断：阴液不足，虚热内生。',
+                    metaphor: '您的身体像一台缺水的发动机：总是发热、干燥，需要加足冷却液（滋阴）。',
+                    plan: '第1-2周：银耳莲子汤，百合粥。第3-4周：麦冬、玉竹泡茶，早睡养阴。第5-8周：西洋参适量，避免熬夜。',
+                    food: '推荐：银耳、百合、梨、藕、枸杞、鸭肉。禁忌：辛辣、烧烤、羊肉、韭菜。',
+                    exercise: '适合：瑜伽、游泳、太极。避免：剧烈运动、高温环境、午后运动。'
+                },
+                phlegmDampness: {
+                    name: '痰湿体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊形体肥胖，舌苔白腻；闻诊口中黏腻；问诊胸闷痰多；切诊脉滑。综合判断：痰湿内蕴，脾失健运。',
+                    metaphor: '您的身体像一条堵塞的下水道：湿气重、痰多，需要疏通清理（化痰祛湿）。',
+                    plan: '第1-2周：薏米红豆粥，陈皮茶。第3-4周：茯苓、白术健脾，快走40分钟。第5-8周：荷叶茶，控制体重。',
+                    food: '推荐：薏米、红豆、冬瓜、荷叶、白萝卜。禁忌：油腻、甜食、肥肉、奶油。',
+                    exercise: '适合：快走、慢跑、游泳。避免：久坐、久卧、潮湿环境。'
+                },
+                dampnessHeat: {
+                    name: '湿热体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊面垢油光，舌红苔黄腻；闻诊口气重；问诊口苦尿黄；切诊脉滑数。综合判断：湿热内蕴，蒸腾于外。',
+                    metaphor: '您的身体像一台过热的发动机：又湿又热，需要降温除湿（清热利湿）。',
+                    plan: '第1-2周：绿豆汤，苦瓜茶。第3-4周：茵陈、栀子清热，避免辛辣。第5-8周：荷叶冬瓜汤，保持清爽。',
+                    food: '推荐：绿豆、苦瓜、冬瓜、薏米、芹菜。禁忌：辛辣、烧烤、酒、羊肉。',
+                    exercise: '适合：游泳、慢跑、瑜伽。避免：高温运动、桑拿、暴晒。'
+                },
+                bloodStasis: {
+                    name: '血瘀体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊面色晦暗，舌质紫暗；闻诊无特殊；问诊刺痛固定；切诊脉涩。综合判断：血行不畅，瘀阻脉络。',
+                    metaphor: '您的身体像一条堵塞的河流：血流不畅，需要疏通河道（活血化瘀）。',
+                    plan: '第1-2周：山楂红糖水，玫瑰花茶。第3-4周：当归、川芎活血，按摩穴位。第5-8周：适量红酒，避免久坐。',
+                    food: '推荐：山楂、玫瑰花、红糖、黑木耳、洋葱。禁忌：生冷、油腻、过咸。',
+                    exercise: '适合：快走、跳舞、太极拳。避免：久坐、久站、剧烈运动。'
+                },
+                qiStagnation: {
+                    name: '气郁体质',
+                    level: maxScore <= 8 ? '轻度' : maxScore <= 16 ? '中度' : '重度',
+                    badge: maxScore <= 8 ? 'badge-mild' : maxScore <= 16 ? 'badge-moderate' : 'badge-severe',
+                    analysis: '望诊神情抑郁，舌淡红；闻诊太息频作；问诊胸闷胁胀；切诊脉弦。综合判断：气机郁滞，情志不畅。',
+                    metaphor: '您的身体像一台憋气的发动机：气不顺，需要疏通排气（疏肝理气）。',
+                    plan: '第1-2周：玫瑰花茶，陈皮粥。第3-4周：柴胡、香附疏肝，户外活动。第5-8周：冥想瑜伽，保持心情愉悦。',
+                    food: '推荐：玫瑰花、陈皮、佛手、金桔、白萝卜。禁忌：油腻、过甜、咖啡、浓茶。',
+                    exercise: '适合：瑜伽、舞蹈、户外散步。避免：独处、久坐、情绪压抑。'
+                }
+            };
+            
+            const info = constitutionInfo[mainType] || constitutionInfo.qiDeficient;
+            
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('result').classList.add('show');
+            
+            document.getElementById('constitution-result').innerHTML = `
+                <h3>${info.name}（${info.level}）</h3>
+                <div class="badge ${info.badge}">${info.level}${info.name}</div>
+                
+                <div class="section">
+                    <h3>🔍 老中医四诊合参分析</h3>
+                    <p>${info.analysis}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>💡 通俗比喻解释</h3>
+                    <p>${info.metaphor}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>💊 分阶段调理方案</h3>
+                    <p>${info.plan}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>🥗 饮食建议</h3>
+                    <p>${info.food}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>🏃 运动建议</h3>
+                    <p>${info.exercise}</p>
+                </div>
+                
+                <div class="section" style="background: #ffebee;">
+                    <h3>⚠️ 注意事项</h3>
+                    <ul>
+                        <li>本测试仅供参考，不能替代专业医疗诊断</li>
+                        <li>如症状严重，请及时就医</li>
+                        <li>调理方案需根据个人情况调整</li>
+                        <li>孕妇、儿童、慢性病患者请咨询医师</li>
+                    </ul>
+                </div>
+            `;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // 初始化
+        renderQuestion();
+    </script>
+</body>
+</html>
